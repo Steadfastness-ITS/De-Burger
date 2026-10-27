@@ -28,12 +28,24 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#315BFF",
+          "image": "./assets/images/Splash screen.png",
+          "imageWidth": 430,
+          "resizeMode": "cover"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-status-bar",
+
+      [
+        "expo-image-picker", {
+      "photosPermission": "De-Burger uses your photos so you can set a profile picture.",
+      "cameraPermission": "De-Burger uses the camera so you can take a profile picture."
+    }]
+
     ],
+
+    
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

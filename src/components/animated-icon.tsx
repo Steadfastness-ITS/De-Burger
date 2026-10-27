@@ -7,6 +7,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 const INITIAL_SCALE_FACTOR = Dimensions.get('screen').height / 90;
 const DURATION = 600;
+const SPLASH_DURATION = 1600;
 
 export function AnimatedSplashOverlay() {
   const [animate, setAnimate] = useState(false);
@@ -16,28 +17,27 @@ export function AnimatedSplashOverlay() {
 
   const splashKeyframe = new Keyframe({
     0: {
-      transform: [{ scale: 1 }],
       opacity: 1,
     },
-    20: {
+    75: {
       opacity: 1,
-    },
-    70: {
-      opacity: 0,
-      easing: Easing.elastic(0.7),
     },
     100: {
       opacity: 0,
-      transform: [{ scale: 1 }],
-      easing: Easing.elastic(0.7),
     },
   });
 
-  const image = <Image style={styles.image} source={require('@/assets/images/expo-logo.png')} />;
+  const image = (
+    <Image
+      contentFit="cover"
+      style={styles.splashImage}
+      source={require('@/assets/images/Splash screen.png')}
+    />
+  );
 
   return animate ? (
     <Animated.View
-      entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
+      entering={splashKeyframe.duration(SPLASH_DURATION).withCallback((finished) => {
         'worklet';
         if (finished) {
           scheduleOnRN(setVisible, false);
@@ -140,9 +140,12 @@ const styles = StyleSheet.create({
   },
   splashOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#208AEF',
+    backgroundColor: '#315BFF',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
+  },
+  splashImage: {
+    ...StyleSheet.absoluteFillObject,
   },
 });

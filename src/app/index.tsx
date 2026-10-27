@@ -1,98 +1,102 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect } from 'react';
+import { View, Text, Image, StyleSheet, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+// The two burger pictures (copy them into your project's assets folder).
+const BIG_BURGER = require('../../assets/images/splash-burger-big.png'); // 204 x 251
+const SMALL_BURGER = require('../../assets/images/splash-burger-small.png'); // 202 x 174
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+// The splash was designed on a 430 px wide screen. Positions and sizes below are
+// measured from that design and scale with the screen width, so the burgers keep
+// the same arrangement (and are never stretched) on every phone.
+const DESIGN_W = 430;
+const BIG = { x: 0, w: 204, h: 251 };
+const SMALL = { x: 134, w: 202, h: 174 };
+
+const SPLASH_DURATION = 5000; // 5 seconds
+
+// Splash screen: shows for 3 seconds, then replaces itself with /home.
+export default function SplashScreen() {
+  const { width, height } = useWindowDimensions();
+  const k = width / DESIGN_W; // scale from the design to this screen
+  const router = useRouter();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace('/home');
+    }, SPLASH_DURATION);
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.root}>
+      <StatusBar style="light" />
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <LinearGradient
+        colors={['#FA9A9A', '#A778BE', '#6B6FD6', '#2B56EE']}
+        locations={[0, 0.4, 0.68, 1]}
+        start={{ x: 0.35, y: 0 }}
+        end={{ x: 0.65, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      {/* App name */}
+      <View
+        style={[styles.titleWrap, { top: height * 0.4 - 45 }]}
+        pointerEvents="none"
+      >
+        <Text style={styles.title}>De-Burger</Text>
+      </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+      {/* Big burger (left, sitting on the bottom edge) */}
+      <Image
+        source={BIG_BURGER}
+        resizeMode="contain"
+        style={{
+          position: 'absolute',
+          left: BIG.x * k,
+          bottom: 0,
+          width: BIG.w * k,
+          height: BIG.h * k,
+        }}
+      />
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {/* Small burger (in front, overlapping the big one's right side) */}
+      <Image
+        source={SMALL_BURGER}
+        resizeMode="contain"
+        style={{
+          position: 'absolute',
+          left: SMALL.x * k,
+          bottom: 0,
+          width: SMALL.w * k,
+          height: SMALL.h * k,
+        }}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: '#2B56EE',
+    overflow: 'hidden',
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
+  titleWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
   },
   title: {
+    fontFamily: 'LobsterTwo_700Bold_Italic',
+    fontSize: 58,
+    color: '#FFFFFF',
     textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    includeFontPadding: false,
+    paddingHorizontal: 10,
   },
 });

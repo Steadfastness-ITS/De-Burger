@@ -1,12 +1,55 @@
 import { Image } from 'expo-image';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { Keyframe, Easing } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import classes from './animated-icon.module.css';
 const DURATION = 300;
+const SPLASH_DURATION = 1600;
 
 export function AnimatedSplashOverlay() {
-  return null;
+  const [animate, setAnimate] = useState(false);
+  const [visible, setVisible] = useState(true);
+
+  if (!visible) return null;
+
+  const splashKeyframe = new Keyframe({
+    0: {
+      opacity: 1,
+    },
+    75: {
+      opacity: 1,
+    },
+    100: {
+      opacity: 0,
+    },
+  });
+
+  const image = (
+    <Image
+      contentFit="cover"
+      style={styles.splashImage}
+      source={require('@/assets/images/Splash screen.png')}
+    />
+  );
+
+  return animate ? (
+    <Animated.View
+      entering={splashKeyframe.duration(SPLASH_DURATION).withCallback((finished) => {
+        'worklet';
+        if (finished) {
+          scheduleOnRN(setVisible, false);
+        }
+      })}
+      style={styles.splashOverlay}>
+      {image}
+    </Animated.View>
+  ) : (
+    <View onLayout={() => setAnimate(true)} style={styles.splashOverlay}>
+      {image}
+    </View>
+  );
 }
 
 const keyframe = new Keyframe({
@@ -99,6 +142,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 76,
     height: 71,
+  },
+  splashOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: '#315BFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  },
+  splashImage: {
+    ...StyleSheet.absoluteFillObject,
   },
   background: {
     width: 128,
